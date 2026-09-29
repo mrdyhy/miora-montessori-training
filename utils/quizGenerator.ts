@@ -1,4 +1,4 @@
-import type { TrainingQuestion } from "@/types/training";
+import type { ParticipantClass, TrainingQuestion } from "@/types/training";
 
 function shuffle<T>(items: readonly T[]): T[] {
   const result = [...items];
@@ -42,50 +42,70 @@ export function validateTrainingDataset(input: unknown): TrainingQuestion[] {
 
 export function generateQuizQuestions(
   dataset: readonly TrainingQuestion[],
+  selectedClass: ParticipantClass,
   count = 10,
   recentQuestionIds: readonly string[] = [],
 ): TrainingQuestion[] {
-  const wanted = Math.min(Math.max(0, count), dataset.length);
+  const eligible = dataset.filter(
+    (question) => question.ageGroup === selectedClass || question.ageGroup === "General",
+  );
+  const wanted = Math.min(Math.max(0, count), eligible.length);
   const recent = new Set(recentQuestionIds);
-  const fresh = shuffle(dataset.filter((question) => !recent.has(question.id)));
-  const fallback = shuffle(dataset.filter((question) => recent.has(question.id)));
-  const pool = [...fresh, ...fallback];
-  const selected: TrainingQuestion[] = [];
+  const classPool = eligible.filter((question) => question.ageGroup === selectedClass);
+  const generalPool = eligible.filter((question) => question.ageGroup === "General");
+  const preferredClassCount = Math.min(classPool.length, Math.ceil(wanted * 0.7));
+  const preferredGeneralCount = Math.min(generalPool.length, wanted - preferredClassCount);
   const selectedIds = new Set<string>();
-  const categoryCounts = new Map<string, number>();
-  const scenarios = new Set<string>();
-  const difficulties = new Set<number>();
 
-  while (selected.length < wanted) {
-    const candidates = pool.filter(
-      (question) =>
-        !selectedIds.has(question.id) &&
-        (categoryCounts.get(question.category) ?? 0) < 2,
-    );
-    const available = candidates.length
-      ? candidates
-      : pool.filter((question) => !selectedIds.has(question.id));
-    if (!available.length) break;
+  const selectFromPool = (pool: readonly TrainingQuestion[], target: number): TrainingQuestion[] => {
+    const fresh = shuffle(pool.filter((question) => !recent.has(question.id) && !selectedIds.has(question.id)));
+    const fallback = shuffle(pool.filter((question) => recent.has(question.id) && !selectedIds.has(question.id)));
+    const candidatesPool = [...fresh, ...fallback];
+    const picked: TrainingQuestion[] = [];
+    const categoryCounts = new Map<string, number>();
+    const scenarios = new Set<string>();
+    const difficulties = new Set<number>();
 
-    const ranked = available
-      .map((question) => ({
-        question,
-        score:
-          (categoryCounts.has(question.category) ? 0 : 100) +
-          (scenarios.has(question.scenarioType) ? 0 : 12) +
-          (difficulties.has(question.difficulty) ? 0 : 6) +
-          (recent.has(question.id) ? -1000 : 0) +
-          Math.random(),
-      }))
-      .sort((a, b) => b.score - a.score);
+    while (picked.length < target) {
+      const candidates = candidatesPool.filter(
+        (question) =>
+          !selectedIds.has(question.id) &&
+          (categoryCounts.get(question.category) ?? 0) < 2,
+      );
+      const available = candidates.length
+        ? candidates
+        : candidatesPool.filter((question) => !selectedIds.has(question.id));
+      if (!available.length) break;
 
-    const next = ranked[0].question;
-    selected.push(next);
-    selectedIds.add(next.id);
-    categoryCounts.set(next.category, (categoryCounts.get(next.category) ?? 0) + 1);
-    scenarios.add(next.scenarioType);
-    difficulties.add(next.difficulty);
+      const ranked = available
+        .map((question) => ({
+          question,
+          score:
+            (categoryCounts.has(question.category) ? 0 : 100) +
+            (scenarios.has(question.scenarioType) ? 0 : 12) +
+            (difficulties.has(question.difficulty) ? 0 : 6) +
+            (recent.has(question.id) ? -1000 : 0) +
+            Math.random(),
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      const next = ranked[0].question;
+      picked.push(next);
+      selectedIds.add(next.id);
+      categoryCounts.set(next.category, (categoryCounts.get(next.category) ?? 0) + 1);
+      scenarios.add(next.scenarioType);
+      difficulties.add(next.difficulty);
+    }
+
+    return picked;
+  };
+
+  const selected: TrainingQuestion[] = [];
+  selected.push(...selectFromPool(classPool, preferredClassCount));
+  selected.push(...selectFromPool(generalPool, preferredGeneralCount));
+  if (selected.length < wanted) {
+    selected.push(...selectFromPool(eligible, wanted - selected.length));
   }
 
-  return selected;
+  return shuffle(selected);
 }

@@ -1,4 +1,5 @@
 export type AnswerId = "A" | "B" | "C" | "D";
+export type ParticipantClass = "Toddler" | "Casa";
 
 export interface TrainingAnswer {
   id: AnswerId;
@@ -33,16 +34,18 @@ export interface QuizAnswerRecord {
 }
 
 export interface QuizSession {
+  participantName: string;
+  selectedClass: ParticipantClass;
   questionIds: string[];
-  currentQuestionIndex: number;
   answers: QuizAnswerRecord[];
-  score: number;
+  currentQuestion: number;
+  startedAt: string;
   sessionCode: string;
-  startDate: string;
 }
 
 export interface CompletedSession {
-  name: string;
+  participantName: string;
+  selectedClass: ParticipantClass;
   date: string;
   score: number;
   total: number;
@@ -52,10 +55,12 @@ export interface CompletedSession {
   answers: QuizAnswerRecord[];
 }
 
+export type CompletedSessionSummary = Omit<CompletedSession, "participantName" | "selectedClass">;
+
 export interface TrainingProgress {
   lastCompletedDate: string | null;
   totalSessions: number;
   recentQuestionIds: string[];
-  recentSessions: CompletedSession[];
-  lastResult: CompletedSession | null;
+  recentSessions: CompletedSessionSummary[];
+  lastResult: CompletedSessionSummary | null;
 }

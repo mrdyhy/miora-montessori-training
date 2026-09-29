@@ -1,27 +1,23 @@
-import { History, Pencil, RotateCcw } from "lucide-react";
+import { History, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/BrandMark";
 import type { QuizSession, TrainingProgress } from "@/types/training";
 import { getLocalDateKey } from "@/utils/date";
 
 interface HomeScreenProps {
-  name: string;
   progress: TrainingProgress;
   activeSession: QuizSession | null;
   onStart: () => void;
   onResume: () => void;
   onRestart: () => void;
-  onChangeName: () => void;
 }
 
 export function HomeScreen({
-  name,
   progress,
   activeSession,
   onStart,
   onResume,
   onRestart,
-  onChangeName,
 }: HomeScreenProps) {
   const completedToday = progress.lastCompletedDate === getLocalDateKey();
 
@@ -30,12 +26,6 @@ export function HomeScreen({
       <section className="app-shell mx-auto flex min-h-[calc(100dvh-2.5rem)] w-full max-w-xl flex-col overflow-hidden rounded-[28px] border border-[#dfe8e3] bg-white shadow-[0_24px_70px_rgba(41,89,67,0.12)] sm:min-h-[720px]">
         <header className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-8 sm:pt-8">
           <BrandMark />
-          {name && (
-            <Button variant="ghost" size="sm" className="h-9 rounded-full px-3 text-[#557467] hover:bg-[#edf5f1]" onClick={onChangeName}>
-              <Pencil className="size-3.5" />
-              Đổi tên
-            </Button>
-          )}
         </header>
 
         <div className="flex flex-1 flex-col justify-center px-6 py-10 sm:px-10 sm:py-12">
@@ -60,6 +50,7 @@ export function HomeScreen({
                 </span>
                 <div>
                   <p className="font-bold text-[#295943]">Bạn có một bài đang làm dở.</p>
+                  <p className="mt-1 text-sm font-semibold text-[#557467]">{activeSession.participantName} · Lớp {activeSession.selectedClass}</p>
                   <p className="mt-1 text-sm leading-6 text-[#687a72]">Đã trả lời {activeSession.answers.length} / {activeSession.questionIds.length} câu.</p>
                 </div>
               </div>

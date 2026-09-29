@@ -32,9 +32,11 @@ export function ResultScreen({ result, questions, onPracticeAgain }: { result: C
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.035em] text-[#295943]">{result.score} / {result.total} câu phù hợp</h1>
 
           <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 rounded-2xl bg-[#f4f8f6] p-4">
-            <div><p className="result-label">Tên</p><p className="result-value truncate">{result.name}</p></div>
+            <div><p className="result-label">Tên</p><p className="result-value truncate">{result.participantName}</p></div>
+            <div><p className="result-label">Lớp</p><p className="result-value">{result.selectedClass}</p></div>
             <div><p className="result-label">Ngày</p><p className="result-value">{dateKeyToVietnamese(result.date)}</p></div>
             <div><p className="result-label">Hoàn thành</p><p className="result-value">{result.total} / {result.total} câu</p></div>
+            <div><p className="result-label">Điểm</p><p className="result-value">{result.score} / {result.total}</p></div>
             <div><p className="result-label">Tỷ lệ</p><p className="result-value text-[#6792BA]">{result.percentage}%</p></div>
           </div>
 
@@ -86,7 +88,7 @@ export function ResultScreen({ result, questions, onPracticeAgain }: { result: C
           </Accordion>
 
           <Button className="mt-3 h-12 w-full rounded-xl bg-[#6792BA] font-bold hover:bg-[#547fa8]" onClick={onPracticeAgain}>
-            <RotateCcw className="size-4" />LUYỆN THÊM 10 CÂU
+            <RotateCcw className="size-4" />LÀM LƯỢT MỚI
           </Button>
         </div>
       </section>
