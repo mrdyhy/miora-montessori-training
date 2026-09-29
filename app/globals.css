@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../vendor/shadcn-tailwind-4.13.0.css";
+
+:root {
+  --background: #f4f7f5;
+  --foreground: #294b3c;
+  --card: #ffffff;
+  --card-foreground: #294b3c;
+  --popover: #ffffff;
+  --popover-foreground: #294b3c;
+  --primary: #6792ba;
+  --primary-foreground: #ffffff;
+  --secondary: #edf5f1;
+  --secondary-foreground: #295943;
+  --muted: #f3f6f4;
+  --muted-foreground: #668076;
+  --accent: #fff5dd;
+  --accent-foreground: #295943;
+  --destructive: #b44452;
+  --border: #dfe8e3;
+  --input: #cbdad2;
+  --ring: #6792ba;
+  --radius: 0.875rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Aptos", "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--background); }
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 8% 5%, rgb(248 191 96 / 14%), transparent 25rem),
+    radial-gradient(circle at 94% 90%, rgb(231 132 161 / 11%), transparent 28rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+}
+button, input { font: inherit; }
+button { touch-action: manipulation; }
+
+.result-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #789087;
+}
+
+.result-value {
+  margin-top: 0.2rem;
+  font-size: 1rem;
+  font-weight: 750;
+  color: #295943;
+}
+
+@media (max-width: 520px) {
+  main { padding: 0 !important; }
+  main > .app-shell { min-height: 100dvh !important; border: 0; border-radius: 0; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
