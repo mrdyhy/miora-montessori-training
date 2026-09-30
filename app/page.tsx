@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import rawDataset from "@/data/montessori-assistant-training-v6.json";
+import rawDataset from "@/data/montessori-assistant-training-v7-final.json";
 import { HomeScreen } from "@/components/HomeScreen";
 import { QuizScreen } from "@/components/QuizScreen";
 import { ResultScreen } from "@/components/ResultScreen";
@@ -64,7 +64,7 @@ export default function Home() {
 
     if (
       storedSession &&
-      storedSession.datasetVersion === "v6" &&
+      storedSession.datasetVersion === "v7-final" &&
       typeof storedSession.participantName === "string" &&
       storedSession.participantName.trim().length > 0 &&
       (storedSession.selectedClass === "Toddler" || storedSession.selectedClass === "Casa") &&
@@ -91,7 +91,7 @@ export default function Home() {
       return;
     }
     const nextSession: QuizSession = {
-      datasetVersion: "v6",
+      datasetVersion: "v7-final",
       participantName,
       selectedClass,
       questionIds: questions.map((question) => question.id),

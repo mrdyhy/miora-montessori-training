@@ -62,8 +62,10 @@ export function ResultScreen({ result, questions, onPracticeAgain }: { result: C
                 return (
                   <article key={question.id} className="rounded-2xl border border-[#e0e8e4] bg-[#fbfcfb] p-4 text-sm leading-6 text-[#445c50]">
                     <p className="text-xs font-bold uppercase tracking-wider text-[#7b9187]">{question.id}</p>
+                    <h2 className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-[#557467]">Tình huống</h2>
                     <p className="mt-2 font-medium">{question.context}</p>
-                    <h2 className="mt-2 font-bold text-[#295943]">{question.question}</h2>
+                    <h2 className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#557467]">Câu hỏi</h2>
+                    <p className="mt-2 font-bold text-[#295943]">{question.question}</p>
                     <div className="mt-4">
                       <WrongAnswerDetails question={question} selectedAnswer={record.answerId} showReasonHeading />
                     </div>

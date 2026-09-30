@@ -34,7 +34,7 @@ export interface QuizAnswerRecord {
 }
 
 export interface QuizSession {
-  datasetVersion: "v6";
+  datasetVersion: "v7-final";
   participantName: string;
   selectedClass: ParticipantClass;
   questionIds: string[];
