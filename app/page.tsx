@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import rawDataset from "@/data/montessori-assistant-training-v5.json";
+import rawDataset from "@/data/montessori-assistant-training-v6.json";
 import { HomeScreen } from "@/components/HomeScreen";
 import { QuizScreen } from "@/components/QuizScreen";
 import { ResultScreen } from "@/components/ResultScreen";
@@ -55,6 +55,7 @@ export default function Home() {
   const [result, setResult] = useState<CompletedSession | null>(null);
   const advanceLock = useRef(false);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- Hydrate client-only localStorage state after mount. */
   useEffect(() => {
     clearLegacyParticipantProfile();
     const storedProgress = loadProgress();
@@ -63,6 +64,7 @@ export default function Home() {
 
     if (
       storedSession &&
+      storedSession.datasetVersion === "v6" &&
       typeof storedSession.participantName === "string" &&
       storedSession.participantName.trim().length > 0 &&
       (storedSession.selectedClass === "Toddler" || storedSession.selectedClass === "Casa") &&
@@ -71,7 +73,7 @@ export default function Home() {
       storedSession.questionIds.every((id) => questionMap.has(id)) &&
       storedSession.currentQuestion >= 1 &&
       storedSession.currentQuestion <= storedSession.questionIds.length &&
-      Array.isArray(storedSession.answers) &&
+      Array.isArray(storedSession.selectedAnswers) &&
       typeof storedSession.startedAt === "string"
     ) {
       setSession(storedSession);
@@ -80,6 +82,7 @@ export default function Home() {
       clearActiveSession();
     }
   }, [questionMap]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const createNewSession = useCallback((participantName: string, selectedClass: ParticipantClass) => {
     const questions = generateQuizQuestions(dataset, selectedClass, 10, progress.recentQuestionIds);
@@ -88,10 +91,11 @@ export default function Home() {
       return;
     }
     const nextSession: QuizSession = {
+      datasetVersion: "v6",
       participantName,
       selectedClass,
       questionIds: questions.map((question) => question.id),
-      answers: [],
+      selectedAnswers: [],
       currentQuestion: 1,
       startedAt: new Date().toISOString(),
       sessionCode: createSessionCode(),
@@ -132,15 +136,15 @@ export default function Home() {
 
   const currentQuestion = session ? questionMap.get(session.questionIds[session.currentQuestion - 1]) ?? null : null;
   const selectedAnswer = currentQuestion
-    ? session?.answers.find((answer) => answer.questionId === currentQuestion.id)?.answerId ?? null
+    ? session?.selectedAnswers.find((answer) => answer.questionId === currentQuestion.id)?.answerId ?? null
     : null;
 
   const selectAnswer = useCallback((answerId: AnswerId) => {
-    if (!session || !currentQuestion || session.answers.some((answer) => answer.questionId === currentQuestion.id)) return;
+    if (!session || !currentQuestion || session.selectedAnswers.some((answer) => answer.questionId === currentQuestion.id)) return;
     const isCorrect = answerId === currentQuestion.bestAnswer;
     const updated: QuizSession = {
       ...session,
-      answers: [...session.answers, { questionId: currentQuestion.id, answerId, isCorrect }],
+      selectedAnswers: [...session.selectedAnswers, { questionId: currentQuestion.id, answerId, isCorrect }],
     };
     setSession(updated);
     saveActiveSession(updated);
@@ -151,7 +155,7 @@ export default function Home() {
     advanceLock.current = true;
 
     if (session.currentQuestion === session.questionIds.length) {
-      const score = session.answers.filter((answer) => answer.isCorrect).length;
+      const score = session.selectedAnswers.filter((answer) => answer.isCorrect).length;
       const completed: CompletedSession = {
         participantName: session.participantName,
         selectedClass: session.selectedClass,
@@ -161,7 +165,7 @@ export default function Home() {
         percentage: Math.round((score / session.questionIds.length) * 100),
         sessionCode: session.sessionCode,
         questionIds: session.questionIds,
-        answers: session.answers,
+        answers: session.selectedAnswers,
       };
       const updatedProgress = recordCompletedSession(progress, completed);
       saveProgress(updatedProgress);
@@ -211,7 +215,7 @@ export default function Home() {
           ? {
               current: session.currentQuestion,
               total: session.questionIds.length,
-              score: session.answers.filter((answer) => answer.isCorrect).length,
+              score: session.selectedAnswers.filter((answer) => answer.isCorrect).length,
             }
           : null,
         question: currentQuestion ? { id: currentQuestion.id, context: currentQuestion.context, question: currentQuestion.question, answers: currentQuestion.answers } : null,

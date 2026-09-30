@@ -51,7 +51,7 @@ export function HomeScreen({
                 <div>
                   <p className="font-bold text-[#295943]">Bạn có một bài đang làm dở.</p>
                   <p className="mt-1 text-sm font-semibold text-[#557467]">{activeSession.participantName} · Lớp {activeSession.selectedClass}</p>
-                  <p className="mt-1 text-sm leading-6 text-[#687a72]">Đã trả lời {activeSession.answers.length} / {activeSession.questionIds.length} câu.</p>
+                  <p className="mt-1 text-sm leading-6 text-[#687a72]">Đã trả lời {activeSession.selectedAnswers.length} / {activeSession.questionIds.length} câu.</p>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">

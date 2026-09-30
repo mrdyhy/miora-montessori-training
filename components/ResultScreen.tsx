@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { BrandMark } from "@/components/BrandMark";
+import { WrongAnswerDetails } from "@/components/AnswerFeedback";
 import type { CompletedSession, TrainingQuestion } from "@/types/training";
 import { dateKeyToVietnamese } from "@/utils/date";
 
@@ -58,17 +59,13 @@ export function ResultScreen({ result, questions, onPracticeAgain }: { result: C
             <div className="mt-4 space-y-4">
               {wrongQuestions.map((question) => {
                 const record = answerMap.get(question.id)!;
-                const chosen = question.answers.find((answer) => answer.id === record.answerId)!;
-                const best = question.answers.find((answer) => answer.id === question.bestAnswer)!;
                 return (
                   <article key={question.id} className="rounded-2xl border border-[#e0e8e4] bg-[#fbfcfb] p-4 text-sm leading-6 text-[#445c50]">
                     <p className="text-xs font-bold uppercase tracking-wider text-[#7b9187]">{question.id}</p>
                     <p className="mt-2 font-medium">{question.context}</p>
                     <h2 className="mt-2 font-bold text-[#295943]">{question.question}</h2>
-                    <div className="mt-3 space-y-3">
-                      <div><p className="font-bold text-[#a34e68]">Bạn chọn: {chosen.id}. {chosen.text}</p><p>{question.analysis[record.answerId]}</p></div>
-                      <div><p className="font-bold text-[#3f7b5d]">Phù hợp hơn: {best.id}. {best.text}</p><p>{question.analysis[question.bestAnswer]}</p></div>
-                      <p className="rounded-xl bg-[#fff7e7] p-3"><strong>Ghi nhớ:</strong> {question.takeaway}</p>
+                    <div className="mt-4">
+                      <WrongAnswerDetails question={question} selectedAnswer={record.answerId} showReasonHeading />
                     </div>
                   </article>
                 );

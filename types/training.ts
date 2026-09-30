@@ -34,10 +34,11 @@ export interface QuizAnswerRecord {
 }
 
 export interface QuizSession {
+  datasetVersion: "v6";
   participantName: string;
   selectedClass: ParticipantClass;
   questionIds: string[];
-  answers: QuizAnswerRecord[];
+  selectedAnswers: QuizAnswerRecord[];
   currentQuestion: number;
   startedAt: string;
   sessionCode: string;

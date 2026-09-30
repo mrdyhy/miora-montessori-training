@@ -1,4 +1,7 @@
-import type { ParticipantClass, TrainingQuestion } from "@/types/training";
+import type { AnswerId, ParticipantClass, TrainingQuestion } from "@/types/training";
+import { hasPrincipleLabel } from "@/utils/principleLabels";
+
+const REQUIRED_ANSWER_IDS: readonly AnswerId[] = ["A", "B", "C", "D"];
 
 function shuffle<T>(items: readonly T[]): T[] {
   const result = [...items];
@@ -10,26 +13,62 @@ function shuffle<T>(items: readonly T[]): T[] {
 }
 
 export function validateTrainingDataset(input: unknown): TrainingQuestion[] {
-  if (!Array.isArray(input)) return [];
+  if (!Array.isArray(input)) {
+    console.warn("[MIORA] Dataset không phải là một danh sách câu hỏi.");
+    return [];
+  }
+  if (input.length !== 300) {
+    console.warn(`[MIORA] Dataset cần 300 câu nhưng hiện có ${input.length} câu.`);
+  }
 
   const seen = new Set<string>();
   return input.filter((item): item is TrainingQuestion => {
-    if (!item || typeof item !== "object") return false;
+    if (!item || typeof item !== "object") {
+      console.warn("[MIORA] Bỏ qua một câu hỏi không phải object.");
+      return false;
+    }
     const question = item as Partial<TrainingQuestion>;
     const answerIds = Array.isArray(question.answers)
       ? question.answers.map((answer) => answer?.id)
       : [];
+    const analysis = question.analysis as Partial<Record<AnswerId, unknown>> | undefined;
+    const validPrincipleTags =
+      Array.isArray(question.principleTags) &&
+      question.principleTags.length > 0 &&
+      question.principleTags.every(
+        (tag) => typeof tag === "string" && tag.trim().length > 0 && hasPrincipleLabel(tag),
+      );
     const valid =
       typeof question.id === "string" &&
+      question.id.trim().length > 0 &&
       !seen.has(question.id) &&
-      typeof question.context === "string" &&
-      typeof question.question === "string" &&
-      typeof question.category === "string" &&
+      typeof question.context === "string" && question.context.trim().length > 0 &&
+      typeof question.question === "string" && question.question.trim().length > 0 &&
+      typeof question.category === "string" && question.category.trim().length > 0 &&
+      typeof question.ageGroup === "string" && question.ageGroup.trim().length > 0 &&
+      typeof question.scenarioType === "string" && question.scenarioType.trim().length > 0 &&
+      typeof question.difficulty === "number" &&
       Array.isArray(question.answers) &&
       question.answers.length === 4 &&
+      question.answers.every(
+        (answer) =>
+          answer &&
+          REQUIRED_ANSWER_IDS.includes(answer.id) &&
+          typeof answer.text === "string" &&
+          answer.text.trim().length > 0,
+      ) &&
+      new Set(answerIds).size === 4 &&
+      REQUIRED_ANSWER_IDS.every((id) => answerIds.includes(id)) &&
       typeof question.bestAnswer === "string" &&
       answerIds.includes(question.bestAnswer) &&
-      Boolean(question.analysis?.[question.bestAnswer as keyof typeof question.analysis]);
+      REQUIRED_ANSWER_IDS.every(
+        (id) => typeof analysis?.[id] === "string" && (analysis[id] as string).trim().length > 0,
+      ) &&
+      typeof question.montessoriPrinciple === "string" &&
+      question.montessoriPrinciple.trim().length > 0 &&
+      validPrincipleTags &&
+      typeof question.takeaway === "string" &&
+      question.takeaway.trim().length > 0;
 
     if (!valid) {
       console.warn(`[MIORA] Bỏ qua câu hỏi không hợp lệ: ${question.id ?? "không có ID"}`);
